@@ -6,7 +6,7 @@ data "aws_availability_zones" "available" {}
 resource "aws_vpc" "valohai-vpc" {
   cidr_block           = var.vpc_ipam ? null : var.vpc_cidr
   ipv4_ipam_pool_id    = var.vpc_ipam ? var.vpc_ipam_pool_id : null
-  ipv4_netmask_length  = var.vpc_ipam ? 24 : null
+  ipv4_netmask_length  = var.vpc_ipam ? 16 : null
   enable_dns_hostnames = true
 
   tags = {
@@ -15,20 +15,32 @@ resource "aws_vpc" "valohai-vpc" {
   }
 }
 
-# Subnet per availability zone
-/*resource "aws_subnet" "valohai_subnets" {
-  count                   = length(data.aws_availability_zones.available.names)
+resource "aws_subnet" "valohai_public_subnet" {
   vpc_id                  = aws_vpc.valohai-vpc.id
-  cidr_block              = "10.0.${16 * count.index}.0/20"  
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  cidr_block              = cidrsubnet( aws_vpc.valohai-vpc.cidr_block, 8, 250)
+  availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
 
   tags = {
-    Name    = "valohai-subnet-${1 + count.index}",
+    Name    = "valohai-public-subnet",
     valohai = 1
   }
 }
 
+# Subnet per availability zone
+resource "aws_subnet" "valohai_subnets" {
+  count                   = length(data.aws_availability_zones.available.names)
+  vpc_id                  = aws_vpc.valohai-vpc.id
+  cidr_block              = cidrsubnet( aws_vpc.valohai-vpc.cidr_block, 8, count.index + 1)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+
+  tags = {
+    Name    = "valohai-worker-subnet-${count.index + 1}",
+    valohai = 1
+  }
+}
+
+/*
 # Internet Gateway
 resource "aws_internet_gateway" "valohai-igw" {
   vpc_id = aws_vpc.valohai-vpc.id
