@@ -1,14 +1,15 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "~> 4.23.0"
     }
   }
 }
 
 provider "aws" {
   profile = var.aws_profile
-  region  = var.region
+  region  = var.region  
 }
 
 module "VPC" {
