@@ -4,7 +4,9 @@ data "aws_availability_zones" "available" {}
 
 # VPC
 resource "aws_vpc" "valohai-vpc" {
-  cidr_block           = var.vpc_cidr
+  cidr_block           = var.vpc_ipam ? null : var.vpc_cidr
+  ipv4_ipam_pool_id    = var.vpc_ipam ? var.vpc_ipam_pool_id : null
+  ipv4_netmask_length  = var.vpc_ipam ? 24 : null
   enable_dns_hostnames = true
 
   tags = {
@@ -14,10 +16,10 @@ resource "aws_vpc" "valohai-vpc" {
 }
 
 # Subnet per availability zone
-resource "aws_subnet" "valohai_subnets" {
+/*resource "aws_subnet" "valohai_subnets" {
   count                   = length(data.aws_availability_zones.available.names)
   vpc_id                  = aws_vpc.valohai-vpc.id
-  cidr_block              = "10.0.${16 * count.index}.0/20"
+  cidr_block              = "10.0.${16 * count.index}.0/20"  
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
 
@@ -106,4 +108,4 @@ resource "aws_security_group" "valohai-sg-queue" {
     Name    = "valohai-sg-queue",
     valohai = 1
   }
-}
+}*/

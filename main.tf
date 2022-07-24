@@ -13,11 +13,13 @@ provider "aws" {
 }
 
 module "VPC" {
-  source   = "./Module/VPC"
-  vpc_cidr = var.vpc_cidr
+  source           = "./Module/VPC"
+  vpc_cidr         = var.vpc_cidr
+  vpc_ipam         = var.vpc_ipam
+  vpc_ipam_pool_id = var.vpc_ipam_pool_id
 }
 
-module "EC2" {
+/*module "EC2" {
   source         = "./Module/EC2"
   ec2_key        = var.ec2_key
   region         = var.region
@@ -55,5 +57,5 @@ module "S3" {
   source = "./Module/S3"
 
   depends_on = [module.IAM_S3]
-}
+}*/
 

@@ -19,6 +19,17 @@ variable "vpc_cidr" {
   type        = string
 }
 
+variable "vpc_ipam" {
+  description = "Use IPAM for determining VPC cidr range dynamically"
+  default     = false
+  type        = bool
+}
+
+variable "vpc_ipam_pool_id" {
+  description = "IPAM pool ID if vpc_ipam is used"
+  type        = string
+}
+
 variable "ec2_key" {
   description = "Location of the ssh key pub file that can be used for Valohai managed instances"
   type        = string
