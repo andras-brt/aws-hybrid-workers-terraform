@@ -3,7 +3,7 @@ output "vpc_id" {
 }
 
 output "queue_subnet" {
-  value = aws_subnet.valohai_public_subnet
+  value = aws_subnet.valohai_public_subnet.id
 }
 
 output "queue_sg" {

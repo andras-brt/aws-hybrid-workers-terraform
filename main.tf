@@ -19,7 +19,7 @@ module "VPC" {
   vpc_ipam_pool_id = var.vpc_ipam_pool_id
 }
 
-/*module "EC2" {
+module "EC2" {
   source         = "./Module/EC2"
   ec2_key        = var.ec2_key
   region         = var.region
@@ -32,7 +32,7 @@ module "VPC" {
   depends_on = [module.VPC]
 }
 
-module "IAM_Master" {
+/*module "IAM_Master" {
   source = "./Module/IAM/Master"
 
   valohai_assume_user  = var.valohai_assume_user
