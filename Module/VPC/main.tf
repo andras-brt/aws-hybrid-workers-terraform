@@ -40,7 +40,6 @@ resource "aws_subnet" "valohai_subnets" {
   }
 }
 
-/*
 # Internet Gateway
 resource "aws_internet_gateway" "valohai-igw" {
   vpc_id = aws_vpc.valohai-vpc.id
@@ -50,15 +49,56 @@ resource "aws_internet_gateway" "valohai-igw" {
   }
 }
 
-# RouteTable
-data "aws_route_table" "valohai-rt" {
+# NGW
+resource "aws_eip" "valohai_natgw_eip" {
+
+}
+
+resource "aws_nat_gateway" "valohai_nat_gw" {
+  subnet_id     = aws_subnet.valohai_public_subnet.id
+  allocation_id = aws_eip.valohai_natgw_eip.id
+  tags = {
+    Name = "valohai-natgw"
+  }
+}
+
+# RouteTable for the public subnet
+resource "aws_route_table" "valohai-public-rt" {
   vpc_id = aws_vpc.valohai-vpc.id
+  tags = {
+    Name = "valohai-public"
+  }
 }
 
 resource "aws_route" "route" {
-  route_table_id         = data.aws_route_table.valohai-rt.id
+  route_table_id         = aws_route_table.valohai-public-rt.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.valohai-igw.id
+}
+
+resource "aws_route_table_association" "valouhai-public-rt-association" {
+  subnet_id      = aws_subnet.valohai_public_subnet.id
+  route_table_id = aws_route_table.valohai-public-rt.id
+}
+
+# RouteTable for the privte (worker) subnets
+resource "aws_route_table" "valohai-private-rt" {
+  vpc_id = aws_vpc.valohai-vpc.id
+  tags = {
+    Name = "valohai-private"
+  }
+}
+
+resource "aws_route" "nat_route" {
+  route_table_id         = aws_route_table.valohai-private-rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_nat_gateway.valohai_nat_gw.id
+}
+
+resource "aws_route_table_association" "valohai-private-rt-association" {
+  count          = length(aws_subnet.valohai_subnets)
+  subnet_id      = aws_subnet.valohai_subnets[count.index].id
+  route_table_id = aws_route_table.valohai-private-rt.id
 }
 
 # Security Groups
@@ -120,4 +160,4 @@ resource "aws_security_group" "valohai-sg-queue" {
     Name    = "valohai-sg-queue",
     valohai = 1
   }
-}*/
+}
